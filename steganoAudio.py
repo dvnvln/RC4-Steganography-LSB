@@ -2,14 +2,15 @@ import os
 import wave
 
 class SteganoAudio:
-    def __init__(self, audioPath):
-        self.audioPath = audioPath
+    def __init__(self, audioPath=None):
+        if(audioPath != None):
+            self.audioPath = audioPath
 
-        self.audioFile = wave.open(self.audioPath, mode='rb')
-        self.frame_bytes = bytearray(list(self.audioFile.readframes(self.audioFile.getnframes())))
+            self.audioFile = wave.open(self.audioPath, mode='rb')
+            self.frame_bytes = bytearray(list(self.audioFile.readframes(self.audioFile.getnframes())))
 
-        self.modified_frame = self.frame_bytes
-        self.embeddedOutputPath = self.audioPath.split(".")[0] + '_embedded.wav'
+            self.modified_frame = self.frame_bytes
+            self.embeddedOutputPath = self.audioPath.split(".")[0] + '_embedded.wav'
 
     def embeddingLSB(self, text):
         self.text = text
@@ -27,6 +28,9 @@ class SteganoAudio:
             fd.writeframes(self.modified_frame)
     
     def textExtraction(self, audioFilePath):
+        self.audioFile = wave.open(audioFilePath, mode='rb')
+        self.frame_bytes = bytearray(list(self.audioFile.readframes(self.audioFile.getnframes())))
+
         self.extractedText = [self.frame_bytes[i] & 1 for i in range(len(self.frame_bytes))]
         self.extractedText = ''.join(chr(int(''.join(map(str, self.extractedText[i:i+8])), 2)) for i in range(0, len(self.extractedText), 8))
         self.extractedText = self.extractedText.split('###')[0]
@@ -34,8 +38,10 @@ class SteganoAudio:
 def main():
     stegano = SteganoAudio("sampleStego.wav")
     stegano.embeddingLSB("hai sayang")
-    stegano.textExtraction("audioEmbedded.wav")
-    print(stegano.extractedText)
+    stegano2 = SteganoAudio()
+    stegano2.textExtraction("sampleStego_embedded.wav")
+    print(stegano2.extractedText)
+    # print(stegano.extractedText)
     # print(stegano.modified_frame)
     # print(stegano.secretText)
 

@@ -1,14 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showerror
-from tkinter import scrolledtext
+from tkinter import scrolledtext, messagebox
 from tkinter.filedialog import askopenfilename
 import os
 from RC4 import *
+from steganoAudio import *
 
 
 class RC4Method:
-    def encrypt(key, plaintext):
+    @staticmethod
+    def audioStegaEmbed(key, plaintext):
         pass
 
 class DecryptionMethod:
@@ -49,12 +50,12 @@ class ConverterFrame(ttk.Frame):
             encryptFrame = tk.Frame(self, padx=25, pady=15)
             encryptFrame.grid(row=1, column=1, padx=5, pady=5, sticky='nsew')
 
-            self.encryptText = tk.scrolledtext.ScrolledText(encryptFrame, height=25, width=30, state='disabled')
+            self.encryptText = tk.scrolledtext.ScrolledText(encryptFrame, height=25, width=30)
             self.encryptText.grid(column=0, row=0, **options)
 
             self.decryptLabel = ttk.Label(self, text='Decrypted Text')
             self.decryptLabel.grid(column=2, row=0, sticky='w', **options)
-            self.decryptText = tk.Text(self, height=25, width=30, state='disabled')
+            self.decryptText = tk.Text(self, height=25, width=30)
             self.decryptText.grid(column=2, row=1, **options)
 
             # field option
@@ -72,6 +73,16 @@ class ConverterFrame(ttk.Frame):
             self.key1_entry = ttk.Entry(sideFrame, textvariable=self.key1)
             self.key1_entry.grid(column=1, row=0, sticky='n', **options)
             self.key1_entry.focus()
+
+            # key2 label
+            self.key2_label = ttk.Label(sideFrame, text='Key 2')
+            self.key2_label.grid(column=0, row=1, sticky='n',  **options)
+
+            # key2 entry
+            self.key2 = tk.StringVar()
+            self.key2_entry = ttk.Entry(sideFrame, textvariable=self.key2)
+            self.key2_entry.grid(column=1, row=1, sticky='n', **options)
+            self.key2_entry.focus()
 
             # encrypt button
             self.encrypt_button = ttk.Button(sideFrame, text='Encrypt Text')
@@ -101,11 +112,23 @@ class ConverterFrame(ttk.Frame):
             self.inputText = tk.Text(encryptFrame, height=1, width=30)
             self.inputText.grid(column=0, row=1, **options)
 
-            self.inputLabel = ttk.Label(encryptFrame, text='Input Text')
-            self.inputLabel.grid(column=1, row=1, sticky='w', **options)
+            self.inputTextLabel = ttk.Label(encryptFrame, text='Input Text')
+            self.inputTextLabel.grid(column=1, row=1, sticky='w', **options)
+
+            self.inputkey1_Text = tk.Text(encryptFrame, height=1, width=30)
+            self.inputkey1_Text.grid(column=0, row=2, **options)
+
+            self.inputkey1_Label = ttk.Label(encryptFrame, text='Key 1')
+            self.inputkey1_Label.grid(column=1, row=2, sticky='w', **options)
+
+            self.inputkey2_Text = tk.Text(encryptFrame, height=1, width=30)
+            self.inputkey2_Text.grid(column=0, row=3, **options)
+
+            self.inputkey2_Label = ttk.Label(encryptFrame, text='Key 2')
+            self.inputkey2_Label.grid(column=1, row=3, sticky='w', **options)
 
             embedFrame = tk.Frame(encryptFrame, padx=25, pady=15)
-            embedFrame.grid(row=2, column=0, padx=5, pady=5, sticky='nsew')
+            embedFrame.grid(row=4, column=0, padx=5, pady=5, sticky='nsew')
 
             self.embedEncryptButton = ttk.Button(embedFrame, text='Embed with Encryption')
             self.embedEncryptButton.grid(column=0, row=0, sticky='w', **options)
@@ -113,7 +136,16 @@ class ConverterFrame(ttk.Frame):
 
             self.embedButton = ttk.Button(embedFrame, text='Embed without Encryption')
             self.embedButton.grid(column=1, row=0, sticky='w', **options)
-            # self.embedEncryptButton.configure(command=self.importFile)
+            self.embedButton.configure(command=self.embedding)
+
+            if(self.feature == 'stegano image'):
+                self.embedEncryptRandomButton = ttk.Button(embedFrame, text='Random Embed with Encryption')
+                self.embedEncryptRandomButton.grid(column=0, row=1, sticky='w', **options)
+                # self.embedEncryptButton.configure(command=self.importFile)
+
+                self.embedRandomButton = ttk.Button(embedFrame, text='Random Embed without Encryption')
+                self.embedRandomButton.grid(column=1, row=1, sticky='w', **options)
+                # self.embedEncryptButton.configure(command=self.importFile)
 
             self.grid(column=0, row=2, padx=5, pady=5, sticky="nsew")
         
@@ -135,37 +167,81 @@ class ConverterFrame(ttk.Frame):
             extractFrame = tk.Frame(encryptFrame, padx=25, pady=15)
             extractFrame.grid(row=1, column=0, padx=5, pady=5, sticky='nsew')
 
-            self.extractEncryptButton = ttk.Button(extractFrame, text='Embed with Encryption')
+            self.extractEncryptButton = ttk.Button(extractFrame, text='Extract with Encryption')
             self.extractEncryptButton.grid(column=0, row=0, sticky='w', **options)
             # self.embedEncryptButton.configure(command=self.importFile)
 
-            self.extractButton = ttk.Button(extractFrame, text='Embed without Encryption')
+            self.extractButton = ttk.Button(extractFrame, text='Extract without Encryption')
             self.extractButton.grid(column=1, row=0, sticky='w', **options)
             # self.embedEncryptButton.configure(command=self.importFile)
+
+            if(self.feature == 'extract image'):
+                self.extractEncryptRandomButton = ttk.Button(extractFrame, text='Random Extract with Encryption')
+                self.extractEncryptRandomButton.grid(column=0, row=1, sticky='w', **options)
+                # self.embedEncryptButton.configure(command=self.importFile)
+
+                self.extractButtonRandom = ttk.Button(extractFrame, text='Random Extract without Encryption')
+                self.extractButtonRandom.grid(column=1, row=1, sticky='w', **options)
+                # self.embedEncryptButton.configure(command=self.importFile)
 
             self.grid(column=0, row=2, padx=5, pady=5, sticky="nsew")
     
     def RC4Encrypt(self, event=None):
-        self.encryptText.config(state='normal')
-        self.encryptText.delete('1.0', 'end')
-        plaintext = self.inputText.get('1.0', 'end-1c')
-        input_key1 = self.key1_entry.get()
-        rc4 = RC4(input_key1, plaintext)
-        encryptedText = rc4.getEncryptedText()
-        self.encryptText.insert(tk.INSERT, encryptedText)
-        self.encryptText.config(state='disabled')
+        if(examp == 1):
+            self.encryptText.config(state='normal')
+            self.encryptText.delete('1.0', 'end')
+            plaintext = self.inputText.get('1.0', 'end-1c')
+            input_key1 = self.key1_entry.get()
+            input_key2 = self.key2_entry.get()
+            rc4 = RC4()
+            encryptedText = rc4.encrypt(plaintext, input_key1, input_key2)
+            self.encryptText.insert(tk.INSERT, encryptedText)
 
     def RC4Decrypt(self, event=None):
         self.decryptText.config(state='normal')
         self.encryptText.config(state='normal')
         encryptedText = self.encryptText.get('1.0', 'end-1c')
-        plaintext = self.inputText.get('1.0', 'end-1c')
         input_key1 = self.key1_entry.get()
-        rc4 = RC4(input_key1, plaintext)
-        decryptedText = rc4.getDecryptedText()
+        input_key2 = self.key2_entry.get()
+        rc4 = RC4()
+        decryptedText = rc4.decrypt(encryptedText, input_key1, input_key2)
         self.decryptText.insert(tk.INSERT, decryptedText)
-        self.encryptText.config(state='disabled')
         self.decryptText.config(state='disabled')
+
+    def imgEmbed(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+    
+    def imgEmbedEncrypt(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+    
+    def imgRandomEmbed(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+
+    def imgRandomEmbedEncrypt(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+
+    def embedding(self, event=None):
+        if(self.feature == 'stegano audio'):
+            self.inputFilepath.config(state='normal')
+            filepath = self.inputFilepath.get('1.0', 'end-1c')
+            self.inputFilepath.config(state='disabled')
+            hiddentxt = self.inputText.get('1.0', 'end-1c')
+            stegano = SteganoAudio(filepath)
+            stegano.embeddingLSB(hiddentxt)
+            messagebox.showinfo("Embedding Audio", "Embedding audio succes!")
+
 
     def importFile(self, event=None):
         f = UtilityFunction.open_file()
@@ -177,7 +253,7 @@ class ConverterFrame(ttk.Frame):
         if(self.feature != "rc4"):
             self.inputFilepath.config(state='normal')
             self.inputFilepath.delete('1.0', 'end')
-            self.inputFilepath.insert(tk.INSERT, fileName)
+            self.inputFilepath.insert(tk.INSERT, fileName + fileExtension)
             self.inputFilepath.config(state='disabled')
         else:
             self.inputText.delete('1.0', 'end')
@@ -234,7 +310,14 @@ class ConverterFrame(ttk.Frame):
         # self.inputText.delete('1.0', 'end')
         # self.decryptText.config(state='disabled')
         # self.imported = False
-        pass
+        if(self.feature == 'rc4'):
+            self.key1_entry.delete(0, "end")
+            self.decryptText.config(state='normal')
+            self.decryptText.delete('1.0', 'end')
+            self.encryptText.delete('1.0', 'end')
+            self.inputText.delete('1.0', 'end')
+            self.decryptText.config(state='disabled')
+        
 
 
 class ControlFrame(ttk.LabelFrame):
@@ -305,7 +388,7 @@ class ControlFrame(ttk.LabelFrame):
 
     def change_frame(self):
         frame = self.frames[self.selected_value.get()]
-        # frame.reset()
+        frame.reset()
         frame.tkraise()
 
 
