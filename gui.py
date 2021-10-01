@@ -5,6 +5,7 @@ from tkinter.filedialog import askopenfilename
 import os
 from RC4 import *
 from steganoAudio import *
+from imagestega import *
 
 
 class RC4Method:
@@ -132,7 +133,7 @@ class ConverterFrame(ttk.Frame):
 
             self.embedEncryptButton = ttk.Button(embedFrame, text='Embed with Encryption')
             self.embedEncryptButton.grid(column=0, row=0, sticky='w', **options)
-            # self.embedEncryptButton.configure(command=self.importFile)
+            self.embedEncryptButton.configure(command=self.encryptEmbed)
 
             self.embedButton = ttk.Button(embedFrame, text='Embed without Encryption')
             self.embedButton.grid(column=1, row=0, sticky='w', **options)
@@ -141,11 +142,11 @@ class ConverterFrame(ttk.Frame):
             if(self.feature == 'stegano image'):
                 self.embedEncryptRandomButton = ttk.Button(embedFrame, text='Random Embed with Encryption')
                 self.embedEncryptRandomButton.grid(column=0, row=1, sticky='w', **options)
-                # self.embedEncryptButton.configure(command=self.importFile)
+                # self.embedEncryptRandomButton.configure(command=self.importFile)
 
                 self.embedRandomButton = ttk.Button(embedFrame, text='Random Embed without Encryption')
                 self.embedRandomButton.grid(column=1, row=1, sticky='w', **options)
-                # self.embedEncryptButton.configure(command=self.importFile)
+                self.embedRandomButton.configure(command=self.randomEmbedding)
 
             self.grid(column=0, row=2, padx=5, pady=5, sticky="nsew")
         
@@ -173,7 +174,15 @@ class ConverterFrame(ttk.Frame):
 
             self.extractButton = ttk.Button(extractFrame, text='Extract without Encryption')
             self.extractButton.grid(column=1, row=0, sticky='w', **options)
-            # self.embedEncryptButton.configure(command=self.importFile)
+            self.extractButton.configure(command=self.extracting)
+
+            sideFrame = tk.Frame(encryptFrame, padx=25, pady=15)
+            sideFrame.grid(row=0, column=2, padx=5, pady=5, sticky='nsew')
+
+            self.decryptLabel = ttk.Label(sideFrame, text='Decrypted Text')
+            self.decryptLabel.grid(column=0, row=0, sticky='w', **options)
+            self.decryptText = tk.Text(sideFrame, height=25, width=30)
+            self.decryptText.grid(column=0, row=1, **options)
 
             if(self.feature == 'extract image'):
                 self.extractEncryptRandomButton = ttk.Button(extractFrame, text='Random Extract with Encryption')
@@ -182,20 +191,19 @@ class ConverterFrame(ttk.Frame):
 
                 self.extractButtonRandom = ttk.Button(extractFrame, text='Random Extract without Encryption')
                 self.extractButtonRandom.grid(column=1, row=1, sticky='w', **options)
-                # self.embedEncryptButton.configure(command=self.importFile)
+                self.extractButtonRandom.configure(command=self.randomExtract)
 
             self.grid(column=0, row=2, padx=5, pady=5, sticky="nsew")
     
     def RC4Encrypt(self, event=None):
-        if(examp == 1):
-            self.encryptText.config(state='normal')
-            self.encryptText.delete('1.0', 'end')
-            plaintext = self.inputText.get('1.0', 'end-1c')
-            input_key1 = self.key1_entry.get()
-            input_key2 = self.key2_entry.get()
-            rc4 = RC4()
-            encryptedText = rc4.encrypt(plaintext, input_key1, input_key2)
-            self.encryptText.insert(tk.INSERT, encryptedText)
+        self.encryptText.config(state='normal')
+        self.encryptText.delete('1.0', 'end')
+        plaintext = self.inputText.get('1.0', 'end-1c')
+        input_key1 = self.key1_entry.get()
+        input_key2 = self.key2_entry.get()
+        rc4 = RC4()
+        encryptedText = rc4.encrypt(plaintext, input_key1, input_key2)
+        self.encryptText.insert(tk.INSERT, encryptedText)
 
     def RC4Decrypt(self, event=None):
         self.decryptText.config(state='normal')
@@ -208,39 +216,83 @@ class ConverterFrame(ttk.Frame):
         self.decryptText.insert(tk.INSERT, decryptedText)
         self.decryptText.config(state='disabled')
 
-    def imgEmbed(self, event=None):
-        self.inputFilepath.config(state='normal')
-        filepath = self.inputFilepath.get('1.0', 'end-1c')
-        self.inputFilepath.config(state='disabled')
-        hiddentxt = self.inputText.get('1.0', 'end-1c')
-    
-    def imgEmbedEncrypt(self, event=None):
-        self.inputFilepath.config(state='normal')
-        filepath = self.inputFilepath.get('1.0', 'end-1c')
-        self.inputFilepath.config(state='disabled')
-        hiddentxt = self.inputText.get('1.0', 'end-1c')
-    
-    def imgRandomEmbed(self, event=None):
-        self.inputFilepath.config(state='normal')
-        filepath = self.inputFilepath.get('1.0', 'end-1c')
-        self.inputFilepath.config(state='disabled')
-        hiddentxt = self.inputText.get('1.0', 'end-1c')
-
-    def imgRandomEmbedEncrypt(self, event=None):
-        self.inputFilepath.config(state='normal')
-        filepath = self.inputFilepath.get('1.0', 'end-1c')
-        self.inputFilepath.config(state='disabled')
-        hiddentxt = self.inputText.get('1.0', 'end-1c')
-
     def embedding(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+
         if(self.feature == 'stegano audio'):
-            self.inputFilepath.config(state='normal')
-            filepath = self.inputFilepath.get('1.0', 'end-1c')
-            self.inputFilepath.config(state='disabled')
-            hiddentxt = self.inputText.get('1.0', 'end-1c')
             stegano = SteganoAudio(filepath)
             stegano.embeddingLSB(hiddentxt)
             messagebox.showinfo("Embedding Audio", "Embedding audio succes!")
+        elif(self.feature == 'stegano image'):
+            EncryptSeqImage(filepath, hiddentxt)
+            messagebox.showinfo("Embedding Audio", "Embedding image succes!")
+
+    def randomEmbedding(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+
+        if(self.feature == 'stegano image'):
+            EncryptAcakImage(filepath, hiddentxt)
+            messagebox.showinfo("Embedding Audio", "Embedding image succes!")
+
+    def encryptEmbed(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+        hiddentxt = self.inputText.get('1.0', 'end-1c')
+        input_key1 = self.inputkey1_Text.get('1.0', 'end-1c')
+        input_key2 = self.inputkey2_Text.get('1.0', 'end-1c')
+        rc4 = RC4()
+        hiddentxt = rc4.encrypt(hiddentxt, input_key1, input_key2)
+
+        if(self.feature == 'stegano audio'):
+            stegano = SteganoAudio(filepath)
+            stegano.embeddingLSB(hiddentxt)
+            messagebox.showinfo("Embedding Audio", "Embedding audio succes!")
+        if(self.feature == 'stegano image'):
+            EncryptSeqImage(filepath, hiddentxt)
+            messagebox.showinfo("Embedding Audio", "Embedding image succes!")
+
+    def extracting(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+
+        if(self.feature == 'extract audio'):
+            stegano = SteganoAudio()
+            stegano.textExtraction(filepath)
+            decryptedText = stegano.extractedText
+        elif(self.feature == 'extract image'):
+            decryptedText = DecryptSeqImage(filepath)
+        
+        self.decryptText.insert(tk.INSERT, decryptedText)
+
+    def randomExtract(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+
+        if(self.feature == 'extract image'):
+            decryptedText = DecryptAcakImage(filepath)
+        
+        self.decryptText.insert(tk.INSERT, decryptedText)
+
+    def encryptExtract(self, event=None):
+        self.inputFilepath.config(state='normal')
+        filepath = self.inputFilepath.get('1.0', 'end-1c')
+        self.inputFilepath.config(state='disabled')
+
+        if(self.feature == 'extract audio'):
+            stegano = SteganoAudio()
+            stegano.textExtraction(filepath)
+            decryptedText = stegano.extractedText
+            rc4 = RC4()
+            decryptedText = rc4.decrypt(decryptedText, input_key1, input_key2)
 
 
     def importFile(self, event=None):

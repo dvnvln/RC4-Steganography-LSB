@@ -65,8 +65,8 @@ def EncryptSeqImage(path, message):
                     count+=1
         count = 0
     cv2.imwrite("hidden_msg_img.png", img)
-    success_label = Label(root, text="Encryption Successful!",highlightbackground="#3E4149")
-    success_label.place(x=160, y=410)
+    # success_label = Label(root, text="Encryption Successful!",highlightbackground="#3E4149")
+    # success_label.place(x=160, y=410)
 
 def DecryptSeqImage(path):
     # global path
@@ -105,8 +105,9 @@ def DecryptSeqImage(path):
         k+=8
     result = ''.join(result)
     print(result)
-    result_label = Label(root, text = result, highlightbackground="#3E4149")
-    result_label.place(x=160, y=460)
+    # result_label = Label(root, text = result, highlightbackground="#3E4149")
+    # result_label.place(x=160, y=460)
+    return result
 
 def EncryptAcakImage(path, message):
     # global path
@@ -227,16 +228,17 @@ def DecryptAcakImage(path):
     result = ''.join(result)
 
     print("arr result",result)
-    result_label = Label(root, text = result, highlightbackground="#3E4149")
-    result_label.place(x=160, y=500)
+    # result_label = Label(root, text = result, highlightbackground="#3E4149")
+    # result_label.place(x=160, y=500)
+    return result
 
 
 
 
-root = Tk()
-root.configure(background='grey')
-root.title("Steganography")
-root.geometry("600x600")
+# root = Tk()
+# root.configure(background='grey')
+# root.title("Steganography")
+# root.geometry("600x600")
 
 # upload_button = Button(root, text="Choose Image", highlightbackground="#3E4149", command=UploadImage)
 # upload_button.place(x= 350, y=50)
@@ -254,4 +256,4 @@ root.geometry("600x600")
 # encode_button.place(x = 400, y = 500)
 
 
-root.mainloop()
+# root.mainloop()
