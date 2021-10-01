@@ -19,9 +19,9 @@ def UploadImage():
 	img.image = render
 	img.place(x=20, y=50)
 
-def EncryptSeqImage():
-    global path
-    message = input_text.get(1.0, "end-1c")
+def EncryptSeqImage(path, message):
+    # global path
+    # message = input_text.get(1.0, "end-1c")
     # print("masuk message : ",message)
     img = cv2.imread(path)
     message = [format(ord(i), '08b') for i in message]
@@ -68,8 +68,8 @@ def EncryptSeqImage():
     success_label = Label(root, text="Encryption Successful!",highlightbackground="#3E4149")
     success_label.place(x=160, y=410)
 
-def DecryptSeqImage():
-    global path
+def DecryptSeqImage(path):
+    # global path
 
     img = cv2.imread(path)
     message = []
@@ -108,9 +108,9 @@ def DecryptSeqImage():
     result_label = Label(root, text = result, highlightbackground="#3E4149")
     result_label.place(x=160, y=460)
 
-def EncryptAcakImage():
-    global path
-    message = input_text.get(1.0,"end-1c")
+def EncryptAcakImage(path, message):
+    # global path
+    # message = input_text.get(1.0,"end-1c")
     img = cv2.imread(path)
     message = [format(ord(i), '08b') for i in message]
     print(img.shape)
@@ -181,8 +181,8 @@ def EncryptAcakImage():
                     break
     cv2.imwrite("acak_msg_img.png", img)
 
-def DecryptAcakImage():
-    global path
+def DecryptAcakImage(path):
+    # global path
     img = cv2.imread(path)
     
     msg = []
@@ -238,20 +238,20 @@ root.configure(background='grey')
 root.title("Steganography")
 root.geometry("600x600")
 
-upload_button = Button(root, text="Choose Image", highlightbackground="#3E4149", command=UploadImage)
-upload_button.place(x= 350, y=50)
+# upload_button = Button(root, text="Choose Image", highlightbackground="#3E4149", command=UploadImage)
+# upload_button.place(x= 350, y=50)
 
-input_text = Text(root, wrap=WORD)
-input_text.place(x=20, y = 350, height = 50, width=350)
+# input_text = Text(root, wrap=WORD)
+# input_text.place(x=20, y = 350, height = 50, width=350)
 
-encode_button = Button(root, text="Encode", highlightbackground="#3E4149", command=EncryptSeqImage)
-encode_button.place(x = 400, y = 360)
-decode_button = Button(root, text="Decode", highlightbackground="#3E4149", command=DecryptSeqImage)
-decode_button.place(x = 500, y = 360)
-encode_button = Button(root, text="Encode Acak", highlightbackground="#3E4149", command=EncryptAcakImage)
-encode_button.place(x = 400, y = 400)
-encode_button = Button(root, text="Decode Acak", highlightbackground="#3E4149", command=DecryptAcakImage)
-encode_button.place(x = 400, y = 500)
+# encode_button = Button(root, text="Encode", highlightbackground="#3E4149", command=EncryptSeqImage)
+# encode_button.place(x = 400, y = 360)
+# decode_button = Button(root, text="Decode", highlightbackground="#3E4149", command=DecryptSeqImage)
+# decode_button.place(x = 500, y = 360)
+# encode_button = Button(root, text="Encode Acak", highlightbackground="#3E4149", command=EncryptAcakImage)
+# encode_button.place(x = 400, y = 400)
+# encode_button = Button(root, text="Decode Acak", highlightbackground="#3E4149", command=DecryptAcakImage)
+# encode_button.place(x = 400, y = 500)
 
 
 root.mainloop()
